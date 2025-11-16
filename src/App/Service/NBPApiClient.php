@@ -73,9 +73,10 @@ class NBPApiClient
         $ttl = $this->historicalTtl;
 
         return $this->fetchWithCache($cacheKey, $ttl, function () use ($currencyCode, $endDate) {
-            // Calculate start date (14 days before end date)
+            // Calculate start date (21 days before end date to ensure 14 business days)
+            // NBP publishes rates only on business days, so we need to fetch more calendar days
             $endDateTime = new \DateTimeImmutable($endDate);
-            $startDateTime = $endDateTime->modify('-14 days');
+            $startDateTime = $endDateTime->modify('-21 days');
             $startDate = $startDateTime->format('Y-m-d');
 
             $url = sprintf(

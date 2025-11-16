@@ -109,7 +109,8 @@ class CurrencyService
             return $b->getDate() <=> $a->getDate();
         });
 
-        return $historicalRates;
+        // Return maximum 14 most recent records
+        return array_slice($historicalRates, 0, 14);
     }
 
     /**

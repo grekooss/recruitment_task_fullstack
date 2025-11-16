@@ -79,3 +79,4 @@ yarn-error.log
 ###< phpunit/phpunit ###
 
 /.claude
+CLAUDE.md

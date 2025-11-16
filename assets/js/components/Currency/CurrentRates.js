@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { fetchCurrentRates, formatRate, getCurrencyName } from '../../services/api';
+import { fetchCurrentRates } from '../../services/api';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import ErrorAlert from '../Common/ErrorAlert';
+import RatesTable from './RatesTable';
 
 /**
  * Component displaying current exchange rates for all supported currencies
@@ -45,10 +46,13 @@ class CurrentRates extends Component {
         return (
             <div className="container mt-4">
                 <div className="row">
-                    <div className="col-md-12">
-                        <h2 className="mb-4">
-                            <i className="fa fa-money"></i> Bieżące kursy walut
-                        </h2>
+                    <div className="col-12">
+                        {/* Header */}
+                        <div className="mb-4">
+                            <h2 className="mb-0">
+                                Bieżące kursy walut
+                            </h2>
+                        </div>
 
                         {loading && <LoadingSpinner message="Pobieranie aktualnych kursów..." />}
 
@@ -58,83 +62,26 @@ class CurrentRates extends Component {
 
                         {!loading && !error && meta && (
                             <div>
-                                {/* Meta information */}
-                                <div className="alert alert-info mb-4">
-                                    <div className="row">
-                                        <div className="col-md-6">
-                                            <strong>Data publikacji NBP:</strong> {meta.publicationDate}
-                                        </div>
-                                        <div className="col-md-6 text-right">
-                                            {meta.isStale ? (
-                                                <span className="badge badge-warning">
-                                                    <i className="fa fa-exclamation-triangle"></i> Dane z cache
-                                                </span>
-                                            ) : (
-                                                <span className="badge badge-success">
-                                                    <i className="fa fa-check"></i> Dane aktualne
-                                                </span>
-                                            )}
-                                        </div>
+                                {/* Meta information - Bootstrap 5 classes */}
+                                <div className="card shadow-sm border-0 mb-4">
+                                    <div className="card-body p-3">
+                                        Data publikacji NBP: <strong>{meta.publicationDate}, {new Date(meta.publicationDate).toLocaleDateString('pl-PL', { weekday: 'long' })}</strong>
                                     </div>
-                                    <small className="text-muted d-block mt-2">
-                                        Ostatnia aktualizacja: {new Date(meta.lastSuccessfulUpdate).toLocaleString('pl-PL')}
-                                    </small>
                                 </div>
 
-                                {/* Rates table */}
-                                <div className="table-responsive">
-                                    <table className="table table-striped table-hover">
-                                        <thead className="thead-dark">
-                                            <tr>
-                                                <th>Waluta</th>
-                                                <th className="text-right">Kurs NBP</th>
-                                                <th className="text-right">Kurs kupna</th>
-                                                <th className="text-right">Kurs sprzedaży</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {data.map((rate) => (
-                                                <tr key={rate.code}>
-                                                    <td>
-                                                        <strong>{rate.code}</strong>
-                                                        <br />
-                                                        <small className="text-muted">
-                                                            {getCurrencyName(rate.code)}
-                                                        </small>
-                                                    </td>
-                                                    <td className="text-right">
-                                                        {formatRate(rate.nbpAverageRate)} PLN
-                                                    </td>
-                                                    <td className="text-right">
-                                                        {rate.buyRate !== null ? (
-                                                            <span className="text-success">
-                                                                <strong>{formatRate(rate.buyRate)} PLN</strong>
-                                                            </span>
-                                                        ) : (
-                                                            <span className="text-muted">-</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="text-right">
-                                                        <span className="text-danger">
-                                                            <strong>{formatRate(rate.sellRate)} PLN</strong>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                {/* Rates display - Table view */}
+                                <RatesTable rates={data} />
 
-                                {/* Info note */}
-                                <div className="alert alert-light mt-3">
-                                    <small>
-                                        <strong>Legenda:</strong>
-                                        <ul className="mb-0 mt-2">
-                                            <li><span className="text-success">Kurs kupna</span> - cena po której kantor skupuje walutę od klienta</li>
-                                            <li><span className="text-danger">Kurs sprzedaży</span> - cena po której kantor sprzedaje walutę klientowi</li>
-                                            <li>"-" oznacza, że kantor nie skupuje danej waluty</li>
-                                        </ul>
-                                    </small>
+                                {/* Info note - Bootstrap 5 classes */}
+                                <div className="alert alert-light border mt-4">
+                                    <h6 className="alert-heading">
+                                        <i className="fa fa-info-circle"></i> Legenda
+                                    </h6>
+                                    <ul className="mb-0 small">
+                                        <li><span className="text-success fw-bold">Kurs kupna</span> - cena po której kantor skupuje walutę od klienta</li>
+                                        <li><span className="text-danger fw-bold">Kurs sprzedaży</span> - cena po której kantor sprzedaje walutę klientowi</li>
+                                        <li>"-" oznacza, że kantor nie skupuje danej waluty</li>
+                                    </ul>
                                 </div>
                             </div>
                         )}
