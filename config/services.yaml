@@ -4,6 +4,36 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    # Supported currencies configuration
+    app.supported_currencies:
+        - EUR
+        - USD
+        - CZK
+        - IDR
+        - BRL
+
+    # Currency margins configuration (buy/sell rates relative to NBP average)
+    app.currency_margins:
+        EUR:
+            buy: -0.15    # NBP - 0.15 PLN
+            sell: 0.11    # NBP + 0.11 PLN
+        USD:
+            buy: -0.15    # NBP - 0.15 PLN
+            sell: 0.11    # NBP + 0.11 PLN
+        CZK:
+            buy: null     # No buying for this currency
+            sell: 0.20    # NBP + 0.20 PLN
+        IDR:
+            buy: null     # No buying for this currency
+            sell: 0.20    # NBP + 0.20 PLN
+        BRL:
+            buy: null     # No buying for this currency
+            sell: 0.20    # NBP + 0.20 PLN
+
+    # NBP API configuration
+    app.nbp_api_base_url: 'https://api.nbp.pl/api'
+    app.cache_ttl_current: 900      # 15 minutes (NBP publishes at noon)
+    app.cache_ttl_historical: 86400 # 24 hours (historical data doesn't change)
 
 services:
     # default configuration for services in *this* file
@@ -28,3 +58,32 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # Guzzle HTTP Client configuration
+    GuzzleHttp\Client:
+        arguments:
+            -
+                timeout: 5
+                connect_timeout: 3
+                http_errors: true
+
+    # NBP API Client with cache
+    App\Service\NBPApiClient:
+        arguments:
+            $httpClient: '@GuzzleHttp\Client'
+            $cache: '@cache.app'
+            $baseUrl: '%app.nbp_api_base_url%'
+            $currentTtl: '%app.cache_ttl_current%'
+            $historicalTtl: '%app.cache_ttl_historical%'
+
+    # Exchange Rate Calculator
+    App\Service\ExchangeRateCalculator:
+        arguments:
+            $margins: '%app.currency_margins%'
+            $supportedCurrencies: '%app.supported_currencies%'
+
+    # Currency Service (Facade)
+    App\Service\CurrencyService:
+        arguments:
+            $nbpApiClient: '@App\Service\NBPApiClient'
+            $calculator: '@App\Service\ExchangeRateCalculator'

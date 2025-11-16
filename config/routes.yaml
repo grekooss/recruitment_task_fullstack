@@ -8,6 +8,19 @@ setupcheck:
     path: /api/setup-check
     controller: App\Controller\DefaultController::setupCheck
 
+# Currency exchange rate API endpoints
+api_rates_current:
+    path: /api/rates/current
+    controller: App\Controller\CurrencyController::getCurrentRates
+    methods: [GET]
+
+api_rates_historical:
+    path: /api/rates/historical/{code}
+    controller: App\Controller\CurrencyController::getHistoricalRates
+    methods: [GET]
+    requirements:
+        code: 'EUR|USD|CZK|IDR|BRL'
+
 index:
     path: /{wildcard}
     defaults: {
